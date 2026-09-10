@@ -1,0 +1,6 @@
+{
+  "name": "AI Project Intelligence Platform",
+  "description": "Engineering analytics platform with GitHub & Taiga sync, developer metrics, and AI-driven delivery risk prediction.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
