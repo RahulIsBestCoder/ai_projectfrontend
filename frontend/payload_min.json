@@ -1,0 +1,12 @@
+{
+  "description": "Build a grocery e-commerce backend with products, customers, orders, and admin panel",
+  "project_name": "Test Project",
+  "ask_team_suggestion": true,
+  "features": [
+    "User authentication",
+    "Product catalog",
+    "Shopping cart",
+    "Order management",
+    "Payment integration"
+  ]
+}

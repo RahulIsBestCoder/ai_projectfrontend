@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Project Report</title>
+  <style>
+    :root { --ink:#0f172a; --muted:#64748b; --line:#cbd5e1; --brand:#4f46e5; --good:#16a34a; --warn:#d97706; --bad:#dc2626; --paper:#fff; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#e2e8f0; color:var(--ink); font:13px/1.45 Arial, sans-serif; }
+    .page { width:210mm; min-height:297mm; margin:12mm auto; padding:14mm; background:var(--paper); box-shadow:0 2px 14px #0002; }
+    header { display:flex; justify-content:space-between; gap:20px; border-bottom:3px solid var(--ink); padding-bottom:14px; }
+    h1 { margin:0; font-size:25px; } h2 { margin:0 0 10px; font-size:14px; text-transform:uppercase; letter-spacing:.06em; }
+    p { margin:0; } .muted { color:var(--muted); } .small { font-size:10px; }
+    .badge { align-self:flex-start; padding:5px 9px; border:1px solid #a5b4fc; background:#eef2ff; color:#3730a3; font-size:10px; font-weight:700; text-transform:uppercase; }
+    .section { margin-top:18px; break-inside:avoid; }
+    .grid { display:grid; gap:10px; } .kpis { grid-template-columns:repeat(4,1fr); } .cols { grid-template-columns:repeat(2,1fr); }
+    .card { border:1px solid var(--line); padding:11px; background:#fff; break-inside:avoid; }
+    .kpi-label { color:var(--muted); font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+    .kpi-value { margin-top:4px; font-size:20px; font-weight:800; }
+    .progress { height:7px; margin-top:8px; background:#e2e8f0; overflow:hidden; } .progress > i { display:block; height:100%; background:var(--brand); }
+    .chart { min-height:180px; border:1px solid var(--line); padding:12px; }
+    .bars { height:125px; display:flex; align-items:flex-end; gap:8px; border-bottom:1px solid var(--line); }
+    .bar { flex:1; min-width:18px; background:var(--brand); position:relative; } .bar span { position:absolute; bottom:-28px; left:50%; transform:translateX(-50%); font-size:8px; white-space:nowrap; }
+    .donut { width:120px; height:120px; margin:8px auto; border-radius:50%; background:conic-gradient(var(--brand) 0 var(--complete), #e2e8f0 var(--complete) 100%); position:relative; }
+    .donut::after { content:attr(data-label); position:absolute; inset:25px; border-radius:50%; background:#fff; display:grid; place-items:center; font-weight:800; font-size:17px; }
+    .list { margin:0; padding-left:18px; } .list li { margin:5px 0; }
+    .risk { border-left:3px solid var(--bad); padding:7px 10px; margin-top:7px; background:#fff7ed; }
+    .evidence { font:10px/1.5 Consolas, monospace; color:#475569; overflow-wrap:anywhere; }
+    footer { margin-top:22px; padding-top:8px; border-top:1px solid var(--line); color:var(--muted); font-size:9px; }
+    @page { size:A4; margin:0; }
+    @media print { body { background:#fff; } .page { margin:0; box-shadow:none; page-break-after:always; } .no-print { display:none!important; } }
+    @media (max-width:800px) { .page { width:100%; margin:0; padding:20px; } .kpis,.cols { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <main class="page" id="report">
+    <header>
+      <div><div class="small muted">AI PROJECT INTELLIGENCE PLATFORM</div><h1 id="title">Latest Project Report</h1><p class="muted" id="project">Project · Latest available project data</p><p class="small muted" id="generated">Generated —</p></div>
+      <div class="badge" id="generation-badge">AI generated</div>
+    </header>
+
+    <section class="section grid kpis" id="kpis"></section>
+    <section class="section"><h2>Executive summary</h2><div class="card" id="summary">No summary available.</div></section>
+    <section class="section"><h2>Visual overview</h2><div class="grid cols" id="charts"></div></section>
+    <section class="section grid cols"><div class="card"><h2>Health and trend</h2><div id="health"></div></div><div class="card"><h2>Velocity and sprint</h2><div id="velocity"></div></div></section>
+    <section class="section"><h2>Plan versus actual</h2><div class="card" id="plan"></div></section>
+    <section class="section"><h2>Feature assessment and evidence</h2><div id="features"></div></section>
+    <section class="section grid cols"><div class="card"><h2>Git activity</h2><div id="git"></div></div><div class="card"><h2>Risks and predictions</h2><div id="risks"></div></div></section>
+    <section class="section"><h2>AI findings and recommendations</h2><div class="card" id="narrative"></div></section>
+    <section class="section"><h2>Evidence sources</h2><div class="card evidence" id="sources"></div></section>
+    <footer>Generated from saved report_data. Printing this page does not regenerate the report.</footer>
+  </main>
+
+  <script>
+    // Assign the canonical project-report object before printing:
+    // window.REPORT_DATA = response.response.dataset.report_data;
+    const report = window.REPORT_DATA || null;
+    const text = (value, fallback = 'Not available') => value === null || value === undefined || value === '' ? fallback : String(value);
+    const pct = value => value === null || value === undefined ? 'Not enough delivery data' : `${Number(value).toFixed(1).replace('.0','')}%`;
+    const rows = object => Object.entries(object || {}).map(([key,value]) => `<p><b>${key.replace(/([A-Z])/g,' $1').replace(/_/g,' ')}:</b> ${text(value)}</p>`).join('');
+    if (report) {
+      const meta=report.report||{}, sum=report.executiveSummary||{}, health=report.healthAndTrend||{}, velocity=report.velocityAndSprint||{}, plan=report.planAndActual||{}, work=report.workBreakdown||{}, git=report.gitActivity||{}, risk=report.risksAndPredictions||{}, ai=report.aiNarrative||{};
+      document.querySelector('#title').textContent=text(meta.title,'Latest Project Report');
+      document.querySelector('#project').textContent=`${text(meta.project?.name,'Project')} · ${text(meta.period?.label,'Latest available project data')}`;
+      document.querySelector('#generated').textContent=`Generated ${meta.generatedAt ? new Date(meta.generatedAt).toLocaleString() : '—'} · ${text(meta.repositoryCount,0)} repositories`;
+      document.querySelector('#generation-badge').textContent=meta.generatedBy==='heuristic'?'Verified-data fallback':'AI generated';
+      const deadline=risk.predictions?.deadlineProbability; const deadlinePct=deadline==null?null:(deadline<=1?deadline*100:deadline);
+      [['Complete',pct(sum.overallProgress)],['Remaining',pct(sum.remainingProgress)],['Tasks',`${text(sum.completedTasks,0)} / ${text(sum.totalTasks,0)}`],['Deadline confidence',pct(deadlinePct)]].forEach(([label,value])=>document.querySelector('#kpis').insertAdjacentHTML('beforeend',`<div class="card"><div class="kpi-label">${label}</div><div class="kpi-value">${value}</div></div>`));
+      document.querySelector('#summary').textContent=text(sum.summary,'No summary available.');
+      document.querySelector('#health').innerHTML=rows(health); document.querySelector('#velocity').innerHTML=rows(velocity); document.querySelector('#plan').innerHTML=rows(plan); document.querySelector('#git').innerHTML=rows(Object.fromEntries(Object.entries(git).filter(([,v])=>!Array.isArray(v))));
+      (report.visualData||[]).forEach(chart=>{ const values=chart.datasets?.[0]?.data||[]; const max=Math.max(...values.filter(v=>v!=null),1); const html=chart.type==='pie'?`<div class="donut" style="--complete:${values[0]||0}%" data-label="${values[0]||0}%"></div>`:`<div class="bars">${values.map((v,i)=>`<div class="bar" style="height:${Math.max(2,(v||0)/max*100)}%"><span>${chart.labels?.[i]||''}</span></div>`).join('')}</div>`; document.querySelector('#charts').insertAdjacentHTML('beforeend',`<div class="chart"><h2>${chart.title}</h2>${html}</div>`); });
+      (work.byFeature||[]).forEach(feature=>document.querySelector('#features').insertAdjacentHTML('beforeend',`<div class="card"><b>${feature.featureName}</b><span style="float:right">${feature.status==='unknown'?'Insufficient evidence':feature.status}</span><div class="progress"><i style="width:${feature.progress||0}%"></i></div><div class="evidence">${(feature.evidence||[]).join('<br>')}</div></div>`));
+      document.querySelector('#risks').innerHTML=rows({overallRisk:risk.overallRisk,deadlineRisk:risk.deadlineRisk,deadlineProbability:pct(deadlinePct),delayProbability:pct((risk.predictions?.delayProbability??0)*100)})+(risk.risks||[]).map(item=>`<div class="risk"><b>${item.title}</b><p>${item.recommendation||''}</p></div>`).join('');
+      document.querySelector('#narrative').innerHTML=`<p>${text(ai.summary,'')}</p><ul class="list">${(ai.recommendations||[]).map(item=>`<li><b>${item.priority}:</b> ${item.action}</li>`).join('')}</ul>`;
+      document.querySelector('#sources').textContent=(meta.sources||[]).join(', ')||'No sources reported.';
+    }
+  </script>
+</body>
+</html>

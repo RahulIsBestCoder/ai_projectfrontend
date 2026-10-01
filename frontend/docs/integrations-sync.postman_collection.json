@@ -1,0 +1,85 @@
+{
+  "info": {
+    "_postman_id": "9f8b6f1e-3a2d-4c5e-9f0a-1b2c3d4e5f6a",
+    "name": "Integration Sync — GitHub & Taiga",
+    "description": "POST /v1/integrations/:id/sync — trigger a GitHub or Taiga sync. The provider is determined by the integration document stored in MongoDB (field `provider`), not by the URL.\n\nSet collection variables first:\n- baseUrl = http://localhost:3000\n- githubIntegrationId = an integration with provider \"github\"\n- taigaIntegrationId = an integration with provider \"taiga\"\n\nFull walkthrough lives in docs/integration-sync-postman.md.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000", "type": "string" },
+    { "key": "githubIntegrationId", "value": "", "type": "string" },
+    { "key": "taigaIntegrationId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "GitHub — Sync Integration",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{}", "options": { "raw": { "language": "json" } } },
+        "url": {
+          "raw": "{{baseUrl}}/v1/integrations/{{githubIntegrationId}}/sync",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "integrations", "{{githubIntegrationId}}", "sync"]
+        },
+        "description": "Runs a GitHub sync for the integration named by `githubIntegrationId`. Prerequisites on the integration doc: provider=\"github\", a PAT with `repo` scope stored as `token`, repository_name=\"owner/repo\", is_deleted=false.\n\nFetches:\n- GET https://api.github.com/repos/{owner}/{repo}/commits?per_page=100\n- GET https://api.github.com/repos/{owner}/{repo}/pulls?state=all&per_page=100&sort=created&direction=desc\n- GET https://api.github.com/repos/{owner}/{repo}/commits/{sha} (per-commit stats, first 50)\n\nExpected 200:\n{ \"status\": true, \"status_message\": \"Sync complete.\", \"data_sets\": { \"status\": \"success\", \"items_synced\": { \"commits\": 100, \"pull_requests\": 25, \"total\": 125 } } }"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "pm.test('Body has status=true + success + items_synced', () => {",
+              "  const b = pm.response.json();",
+              "  pm.expect(b.status).to.eql(true);",
+              "  pm.expect(b.status_message).to.eql('Sync complete.');",
+              "  pm.expect(b.data_sets.status).to.eql('success');",
+              "  pm.expect(b.data_sets.items_synced).to.include.keys('commits', 'pull_requests', 'total');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Taiga — Sync Integration",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{}", "options": { "raw": { "language": "json" } } },
+        "url": {
+          "raw": "{{baseUrl}}/v1/integrations/{{taigaIntegrationId}}/sync",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "integrations", "{{taigaIntegrationId}}", "sync"]
+        },
+        "description": "Runs a Taiga sync for the integration named by `taigaIntegrationId`. Prerequisites on the integration doc: provider=\"taiga\", a Taiga API token stored as `token`, repository_name=project slug, project_id=linked project.\n\nFetches from https://api.taiga.io/api/v1:\n- GET /milestones?project_id={id}\n- GET /user_stories?project_id={id}\n- GET /tasks?project_id={id}\n- GET /sprints?project_id={id}\n\nExpected 200:\n{ \"status\": true, \"status_message\": \"Sync complete.\", \"data_sets\": { \"status\": \"success\", \"items_synced\": { \"work_items\": 30, \"sprints\": 3, \"tasks\": 45, \"sprint_summaries\": 3, \"task_statuses\": 5, \"total\": 86 } } }"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "pm.test('Body has status=true + success + items_synced', () => {",
+              "  const b = pm.response.json();",
+              "  pm.expect(b.status).to.eql(true);",
+              "  pm.expect(b.status_message).to.eql('Sync complete.');",
+              "  pm.expect(b.data_sets.status).to.eql('success');",
+              "  pm.expect(b.data_sets.items_synced).to.include.keys('work_items', 'sprints', 'tasks', 'sprint_summaries', 'task_statuses', 'total');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ]
+}
