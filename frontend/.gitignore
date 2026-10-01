@@ -15,6 +15,8 @@ node_modules/
 dist/
 logs/
 .env
+.md 
+docs/
 #package-lock.json
 # Compiled Java class files
 *.class

@@ -57,13 +57,6 @@ npm run seed:week
 npm run dev                   # nodemon + ts-node, listens on :3000
 ```
 
-**Seed logins** (whichever seed ran):
-
-| Source | Email | Password |
-|---|---|---|
-| `seed:mongo` | `admin@aiproject.local` (+ `pm@`, `dev1@`, `dev2@`) | `Admin@123` |
-| `seed:dummy` | `firstname.lastname@aiproject.local` | `Password@123` |
-
 If `POST /v1/user/generateToken` returns *"User not found"*, the DB the backend is
 connected to wasn't seeded with that account — try the other seed set or check
 `MONGODB_URI` / `DB_NAME` in the backend `.env`.
